@@ -1,42 +1,42 @@
-<!DOCTYPE html>
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta charset="utf-8">
-    <title>Chile.Zhang</title>
-    <link rel="stylesheet" href="http://zhangchile.github.io/stylesheets/style.css">
-</head>
-<body>
-    <div class="central-wrapper">
-        <img class="profile-image" src="http://zhangchile.github.io/images/profile.jpeg" alt="zhangchile profile">
-        <h1 class="profile-name"><a href="https://github.com/zhangchile">Chile.Zhang</a></h1>
-        <h2 class="project-list-title">Skill</h2>
-        <ul class="project-list">
-            <li>
-                <a href="#" title="php">PHP</a>
-            </li>
-            <li>
-                <a href="#" title="JavaScript">JavaScript</a>
-            </li>
-            <li>
-                <a href="#" title="MySQL">MySQL</a>
-            </li>
-        </ul>
-        <a class="more-projects" href="#" title="More">other web develop skill</a>
-        <h2 class="project-list-title">Internship</h2>
-        <ul class="project-list">
-            <li>
-                <a target="_blank" href="http://56.com/" title="56.com">56.com - php engineer</a>
-            </li>
-        </ul>
-        <h2 class="project-list-title">Contact Me</h2>
-        <ul class="project-list">
-            <li>
-                <a href="#" title="mail">chile.zhang@qq.com</a>
-            </li>
-        </ul>
-    </div>
-    <div class="footer-wrapper">
-        <a href="https://github.com/zhangchile">GitHub</a> ·
-        <a target="_blank" href="http://chilezhang.sinaapp.com/">Blog</a>
-    </div>
+---
+layout: page
+description: "stay hungery stay foolish"
+---
 
-</body></html>
+{% for post in paginator.posts %}
+<div class="post-preview">
+    <a href="{{ post.url | prepend: site.baseurl }}">
+        <h2 class="post-title">
+            {{ post.title }}
+        </h2>
+        {% if post.subtitle %}
+        <h3 class="post-subtitle">
+            {{ post.subtitle }}
+        </h3>
+        {% endif %}
+        <div class="post-content-preview">
+            {{ post.content | strip_html | truncate:200 }}
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by {% if post.author %}{{ post.author }}{% else %}{{ site.title }}{% endif %} on {{ post.date | date: "%B %-d, %Y" }}
+    </p>
+</div>
+<hr>
+{% endfor %}
+
+<!-- Pager -->
+{% if paginator.total_pages > 1 %}
+<ul class="pager">
+    {% if paginator.previous_page %}
+    <li class="previous">
+        <a href="{{ paginator.previous_page_path | prepend: site.baseurl | replace: '//', '/' }}">&larr; Newer Posts</a>
+    </li>
+    {% endif %}
+    {% if paginator.next_page %}
+    <li class="next">
+        <a href="{{ paginator.next_page_path | prepend: site.baseurl | replace: '//', '/' }}">Older Posts &rarr;</a>
+    </li>
+    {% endif %}
+</ul>
+{% endif %}

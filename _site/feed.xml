@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>chile.zhang</title>
+    <description></description>
+    <link>http://localhost:4000/</link>
+    <atom:link href="http://localhost:4000/feed.xml" rel="self" type="application/rss+xml" />
+    <pubDate>Tue, 15 Nov 2016 23:33:38 +0800</pubDate>
+    <lastBuildDate>Tue, 15 Nov 2016 23:33:38 +0800</lastBuildDate>
+    <generator>Jekyll v3.3.0</generator>
+    
+      <item>
+        <title>welcome to my blog</title>
+        <description>&lt;h2 id=&quot;hello-world&quot;&gt;Hello, World&lt;/h2&gt;
+
+&lt;p&gt;2016 年 11月&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;“One two begin!”&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;刚注册github的时候就想用github page 做自己的博客，但是一直都没找好看的模板，就放弃了，直到最近突然想起，找的了一个很不错的模板，感谢&lt;a href=&quot;https://huangxuan.me&quot;&gt;Hux&lt;/a&gt;开源了他自己的博客模板，让我又重新想用github page 写博客了。&lt;/p&gt;
+
+&lt;p&gt;很多时候，我自己写的东西都是藏在Evernote里的，而且大部分都是剪藏网页放在那里，自己很少看，方便以后查阅。后来发现为何不整理后，用自己的理解知识分享给其他人，或许这样能帮人一把，比较每个的理解都不一样的，说不定刚好我的理解就帮到他了。&lt;/p&gt;
+
+&lt;p&gt;于是，开始用github page 写博客了，当然了是关于web开发的相关的技术了。&lt;/p&gt;
+
+&lt;p&gt;写这篇做个开头，也希望自己以后能坚持分享，坚持写，加油。&lt;/p&gt;
+</description>
+        <pubDate>Tue, 08 Nov 2016 00:00:00 +0800</pubDate>
+        <link>http://localhost:4000/2016/11/08/welcome-2016/</link>
+        <guid isPermaLink="true">http://localhost:4000/2016/11/08/welcome-2016/</guid>
+        
+        <category>life</category>
+        
+        
+      </item>
+    
+  </channel>
+</rss>

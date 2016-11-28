@@ -170,12 +170,15 @@
 
 <h3 id="amdmodulesasynchronousdefinition">AMD（Modules/AsynchronousDefinition）标准</h3>
 <p>在这个标准中，模块的加载都是提前异步加载的，模块中的变量都是包裹在一个函数define()中的，基本定义是这样的：</p>
+
 <div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="nx">define</span><span class="p">(</span><span class="nx">string</span> <span class="nx">id</span><span class="p">?,</span> <span class="nx">array</span> <span class="nx">dependencies</span><span class="p">?,</span> <span class="nb">Object</span><span class="o">|</span><span class="nb">Function</span> <span class="nx">factory</span><span class="p">);</span>
 </code></pre>
 </div>
+
 <p>其中id（模块标识），dependencies（依赖模块）是可选的参数，而factory是具体的功能函数或对象。
 依赖会在执行factory前加载完成，factory是依赖加载后的回调，依赖的对象会依次注入到factory中。
 一个完整的例子是这样的：</p>
+
 <div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="nx">define</span><span class="p">([</span><span class="nx">dependence</span><span class="p">],</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">dependence</span><span class="p">)</span> <span class="p">{</span>
   <span class="c1">// use dependence obj to do something</span>
   <span class="c1">// dependence.foo()...</span>
@@ -185,6 +188,7 @@
 <span class="p">}</span>
 </code></pre>
 </div>
+
 <ul>
   <li>所有的依赖都是提前加载的，即便没有用到也会加载。</li>
   <li>包裹在define里可以很好的避免全局污染</li>
@@ -199,9 +203,9 @@
 <p>在这个规范中，模块加载是无需提前加载的，可以在模块的factory中按需加载的，这样可以大大的提高加载性能。</p>
 
 <p>这个标准目的是为了解决浏览器端的模块加载问题，多数情况下浏览器加载js文件是通过XMLHttpRequest或者动态插入scrip标签来加载的，
-XMLHttpRequest是限制了同源策略，而动态插入的会无法共享同一个上下文，所以有了这个浏览器端模块加载器解决方案。</p>
+XMLHttpRequest是限制了同源策略，而动态插入的会无法共享同一个上下文，所以有了这个浏览器端模块加载器解决方案。<br />
+基本定义：</p>
 
-<p>基本定义：</p>
 <div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="nx">module</span><span class="p">.</span><span class="nx">declear</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">require</span><span class="p">,</span> <span class="nx">exports</span><span class="p">,</span> <span class="nx">module</span><span class="p">)</span> <span class="p">{</span>
   <span class="nx">exports</span><span class="p">.</span><span class="nx">foo</span> <span class="o">=</span> <span class="s2">"foo"</span><span class="p">;</span>
 <span class="p">});</span>
@@ -213,6 +217,7 @@ XMLHttpRequest是限制了同源策略，而动态插入的会无法共享同一
 <h3 id="commonjs">CommonJS规范</h3>
 <p>这个规范最重要的是加载的时候是同步的，
 基本定义：</p>
+
 <div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">foo1</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'foo1'</span><span class="p">);</span>
 <span class="kd">var</span> <span class="nx">foo2</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'foo2'</span><span class="p">);</span>
 <span class="kd">var</span> <span class="nx">func</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
@@ -222,6 +227,7 @@ XMLHttpRequest是限制了同源策略，而动态插入的会无法共享同一
 <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="nx">func</span><span class="p">;</span>
 </code></pre>
 </div>
+
 <p>require是同步加载的，只有foo1加载完成了才会继续加载foo2模块，为的是解决服务端的模块加载问题</p>
 
 <p>Node.js使用的是这个规范。</p>

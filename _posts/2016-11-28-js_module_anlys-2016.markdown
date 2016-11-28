@@ -13,13 +13,15 @@ tags:
 
 ### AMD（Modules/AsynchronousDefinition）标准
 在这个标准中，模块的加载都是提前异步加载的，模块中的变量都是包裹在一个函数define()中的，基本定义是这样的：
-```js  
+
+```javascript  
 define(string id?, array dependencies?, Object|Function factory);
 ```
 其中id（模块标识），dependencies（依赖模块）是可选的参数，而factory是具体的功能函数或对象。
 依赖会在执行factory前加载完成，factory是依赖加载后的回调，依赖的对象会依次注入到factory中。
 一个完整的例子是这样的：  
-```js  
+
+```javascript  
 define([dependence], function (dependence) {
   // use dependence obj to do something
   // dependence.foo()...
@@ -42,7 +44,8 @@ define([dependence], function (dependence) {
 这个标准目的是为了解决浏览器端的模块加载问题，多数情况下浏览器加载js文件是通过XMLHttpRequest或者动态插入scrip标签来加载的，
 XMLHttpRequest是限制了同源策略，而动态插入的会无法共享同一个上下文，所以有了这个浏览器端模块加载器解决方案。  
 基本定义：  
-```js  
+
+```javascript  
 module.declear(function (require, exports, module) {
   exports.foo = "foo";
 });
@@ -53,7 +56,7 @@ Sea.js使用的是这个规范
 这个规范最重要的是加载的时候是同步的，
 基本定义：
 
-```js  
+```javascript  
 var foo1 = require('foo1');
 var foo2 = require('foo2');
 var func = function () {

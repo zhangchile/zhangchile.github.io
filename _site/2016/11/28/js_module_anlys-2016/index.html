@@ -171,7 +171,7 @@
 <h3 id="amdmodulesasynchronousdefinition">AMD（Modules/AsynchronousDefinition）标准</h3>
 <p>在这个标准中，模块的加载都是提前异步加载的，模块中的变量都是包裹在一个函数define()中的，基本定义是这样的：</p>
 
-<div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="nx">define</span><span class="p">(</span><span class="nx">string</span> <span class="nx">id</span><span class="p">?,</span> <span class="nx">array</span> <span class="nx">dependencies</span><span class="p">?,</span> <span class="nb">Object</span><span class="o">|</span><span class="nb">Function</span> <span class="nx">factory</span><span class="p">);</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">define</span><span class="p">(</span><span class="nx">string</span> <span class="nx">id</span><span class="p">?,</span> <span class="nx">array</span> <span class="nx">dependencies</span><span class="p">?,</span> <span class="nb">Object</span><span class="o">|</span><span class="nb">Function</span> <span class="nx">factory</span><span class="p">);</span>
 </code></pre>
 </div>
 
@@ -179,7 +179,7 @@
 依赖会在执行factory前加载完成，factory是依赖加载后的回调，依赖的对象会依次注入到factory中。
 一个完整的例子是这样的：</p>
 
-<div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="nx">define</span><span class="p">([</span><span class="nx">dependence</span><span class="p">],</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">dependence</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">define</span><span class="p">([</span><span class="nx">dependence</span><span class="p">],</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">dependence</span><span class="p">)</span> <span class="p">{</span>
   <span class="c1">// use dependence obj to do something</span>
   <span class="c1">// dependence.foo()...</span>
   <span class="k">return</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
@@ -206,7 +206,7 @@
 XMLHttpRequest是限制了同源策略，而动态插入的会无法共享同一个上下文，所以有了这个浏览器端模块加载器解决方案。<br />
 基本定义：</p>
 
-<div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="nx">module</span><span class="p">.</span><span class="nx">declear</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">require</span><span class="p">,</span> <span class="nx">exports</span><span class="p">,</span> <span class="nx">module</span><span class="p">)</span> <span class="p">{</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="nx">module</span><span class="p">.</span><span class="nx">declear</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">require</span><span class="p">,</span> <span class="nx">exports</span><span class="p">,</span> <span class="nx">module</span><span class="p">)</span> <span class="p">{</span>
   <span class="nx">exports</span><span class="p">.</span><span class="nx">foo</span> <span class="o">=</span> <span class="s2">"foo"</span><span class="p">;</span>
 <span class="p">});</span>
 </code></pre>
@@ -218,7 +218,7 @@ XMLHttpRequest是限制了同源策略，而动态插入的会无法共享同一
 <p>这个规范最重要的是加载的时候是同步的，
 基本定义：</p>
 
-<div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">foo1</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'foo1'</span><span class="p">);</span>
+<div class="language-js highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">foo1</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'foo1'</span><span class="p">);</span>
 <span class="kd">var</span> <span class="nx">foo2</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'foo2'</span><span class="p">);</span>
 <span class="kd">var</span> <span class="nx">func</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
   <span class="k">return</span> <span class="nx">foo1</span> <span class="o">+</span> <span class="nx">foo2</span><span class="p">;</span>

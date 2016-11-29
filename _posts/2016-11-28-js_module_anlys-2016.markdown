@@ -34,9 +34,9 @@ define([dependence], function (dependence) {
 - 包裹在define里可以很好的避免全局污染
 
 实现这个标准且用得比较多的加载器：  
-[1].[RequireJS](http://requirejs.org/)  
-[2].[curl.js](https://github.com/cujojs/curl/)  
-[3].[Dojo](http://dojotoolkit.org/reference-guide/1.10/loader/)  
+1. [RequireJS](http://requirejs.org/)  
+2. [curl.js](https://github.com/cujojs/curl/)  
+3. [Dojo](http://dojotoolkit.org/reference-guide/1.10/loader/)  
 
 ### Modules/Wrappings 标准
 在这个规范中，模块加载是无需提前加载的，可以在模块的factory中按需加载的，这样可以大大的提高加载性能。
@@ -50,10 +50,10 @@ module.declear(function (require, exports, module) {
   exports.foo = "foo";
 });
 ```
-Sea.js使用的是这个规范
+Sea.js参考的是这个规范，但也做些了变体，如将module.declear改为了define，并成为CMD规范。
 
 ### CommonJS规范
-这个规范最重要的是加载的时候是同步的，
+这个规范最重要的是加载的时候是同步的，外围没有函数包裹，可以理解一个模块是一段可重用的代码。主要包含两部分，一个是exports的自由变量，它包含模块希望提供给其它模块的对象；以及一个 require 函数，让模块用来导入其它模块的导出。
 基本定义：
 
 ```javascript  
@@ -63,14 +63,13 @@ var func = function () {
   return foo1 + foo2;
 }
 // ...
-module.exports = func;
+exports = func;
 ```
 
-require是同步加载的，只有foo1加载完成了才会继续加载foo2模块，为的是解决服务端的模块加载问题
+- require是同步加载的，只有foo1加载完成了才会继续加载foo2模块，目的是解决服务端的模块同步加载问题
 
 Node.js使用的是这个规范。
 
 参考:  
 [1].[Modules Wrappings](http://wiki.commonjs.org/wiki/Modules/Wrappings)  
 [2].[Modules AsynchronousDefinition](http://wiki.commonjs.org/wiki/Modules/AsynchronousDefinition)  
-[3].[common js](...)

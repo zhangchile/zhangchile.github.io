@@ -7,6 +7,7 @@ author: "chile.zhang"
 header-img: "img/post-bg-2016.jpg"
 tags:
     - Javascript
+    - 前端
 ---
 
 ## 模块化加载标准的理解

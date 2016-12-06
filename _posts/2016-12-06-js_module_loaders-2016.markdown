@@ -6,9 +6,9 @@ date: 2016-12-06
 author: "chile.zhang"
 header-img: "img/post-bg-2016.jpg"
 tags:
-    - Javascript
-    - 模块化
-    - 前端
+    - Javascript  
+    - 模块化  
+    - 前端  
 ---
 
 ## 模块化加载器的理解
@@ -69,7 +69,7 @@ webpack是一个模块打包工具，其可以兼容多种js书写规范（AMD,C
 比如CoffeeScript用的是coffee-loader  
 
 大致的写法是这样子的:  
-```javascript   
+```javascript  
 module.exports = {
   entry:[
     './entry.js',

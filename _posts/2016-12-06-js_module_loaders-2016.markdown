@@ -18,7 +18,8 @@ tags:
 **factory执行的时机**
 seajs是玉伯大神的作品，在我工作中也经常用到，这个模块加载器主要解决了两个问题：一个是命名冲突，模块依赖的问题；另一个是模块的加载和执行。  
 基本用法：  
-```javascript  
+
+```javascript   
 define(function (require, exports, module) {
   var foo = require('foo');
   if (foo.val > 0) {
@@ -32,7 +33,7 @@ define(function (require, exports, module) {
   module.exports.obj = {}
   // ...
 });
-```
+```  
 - select的值是根据条件执行的，就是说虽然模块(select1,select2)都下载好了，但是并没有执行factory，预下载，按需执行，更“懒”一些，启动得快了，但也会降低了一点执行的性能。  
 
 **理念**
@@ -59,7 +60,7 @@ RequireJS 有一系列插件，功能很强大，但破坏了模块加载器的�
 
 ### Webpack
 webpack是一个模块打包工具，其可以兼容多种js书写规范（AMD,CMD），且可以处理模块间的依赖关系，具有更强大的js模块化的功能。官网中用下图描述了webpack采用不同的loader加载不同的资源文件，打包生成多个js文件，也可以根据设置生成独立的图片、css文件等。  
-![webpack](img/in-post/2016-12-06/webpack.jpg)
+![webpack](/img/in-post/2016-12-06/webpack.jpg)
 
 在Webpack当中，所有的资源都被当作是模块，js，css，图片等等...  
 因此，Webpack当中js可以引用css，css中可以嵌入图片dataUrl  
@@ -68,7 +69,7 @@ webpack是一个模块打包工具，其可以兼容多种js书写规范（AMD,C
 比如CoffeeScript用的是coffee-loader  
 
 大致的写法是这样子的:  
-```javascript  
+```javascript   
 module.exports = {
   entry:[
     './entry.js',
@@ -85,7 +86,7 @@ module.exports = {
       ],
   },
 };
-```
+```  
 - 其中entry参数定义了打包后的入口文件，数组中的所有文件会打包生成一个filename文件
 - output参数定义了输出文件的位置及名字，其中参数path是指文件的绝对路径，publicPath是指访问路径，filename是指输出的文件名。
 - module.loaders 定义了每个模块加载的解析器，所以，被模块化的不止是js了。  

@@ -61,7 +61,7 @@ define(['dep1', 'dep2'], function (dep1, dep2) {
 RequireJS 有一系列插件，功能很强大，但破坏了模块加载器的纯粹性。  
 
 ### Webpack
-webpack是一个模块打包工具，其可以兼容多种js书写规范（AMD,CMD），且可以处理模块间的依赖关系，具有更强大的js模块化的功能。官网中用下图描述了webpack采用不同的loader加载不同的资源文件，打包生成多个js文件，也可以根据设置生成独立的图片、css文件等。  
+webpack是一个模块打包工具，其可以兼容多种js书写规范（AMD,CMD等），且可以处理模块间的依赖关系，具有更强大的js模块化的功能。官网中用下图描述了webpack采用不同的loader加载不同的资源文件，打包生成多个js文件，也可以根据设置生成独立的图片、css文件等。  
 ![webpack](/img/in-post/2016-12-06/webpack.jpg)
 
 在Webpack当中，所有的资源都被当作是模块，js，css，图片等等...  

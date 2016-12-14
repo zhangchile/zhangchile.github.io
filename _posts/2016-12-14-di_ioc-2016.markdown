@@ -1,0 +1,163 @@
+---
+layout: post
+title : 依赖注入DI(Dependence Inject)
+subtitle: ""
+date: 2016-12-14
+author: "chile.zhang"
+header-img: "img/post-bg-2016.jpg"
+tags:
+    - PHP
+---
+
+## 依赖注入
+
+### 概念
+首先来搞清楚这个抽象的概念，依赖注入，按照字面的意思，就是把需要的依赖提供给要用的对象上，上代码：  
+
+```php
+<?php
+class Request {
+  public function getParam() {
+    echo 'get params';
+  }
+
+}
+
+class Demo {
+  public function handle(Request $rq) {
+    echo $rq->getParam();
+  }
+}
+?>
+```
+`$rq`这个变量就是注入进来的对象，这样，handle()这个方法就无需关注`$rq`是怎么来的，直接用他的方法就可以了。  
+好，现在有了个直观的印象，接下来看看是怎么用的。  
+
+```php
+<?php
+$request = new Request();
+$d = new Demo();
+$d->getParam($request);
+?>
+```
+以上是通过外部注入的，我们再来看另一种注入，构造函数注入  
+
+```php
+<?php
+class Demo {
+  public $rq = null;
+  public function __construct(Request $rq) {
+    $this->rq = $rq;
+  }
+  // ...
+}
+// 调用方式
+$d = new Demo(new Request());
+?>
+```
+以上两种是最简单的注入方式，但往往是很难达到业务需求的，想想，当注入的对象比较多，使用的次数也比较多，那么就需要不断手动去new很多对象，注入到目标对象中，一但要修改，你肯定会傻眼的。  
+到这里，应该有许多人有想法了，搞个工厂方法，专门生产这些对象不就好了么
+，是的，上代码：  
+
+```php
+<?php
+class Factory {
+  public createRequest() {
+    $rq = new Request();
+    $rq->length = count($rq->getParam());
+    // $rq->... 做一些对象初始化之类的操作
+    return $rq;
+  }
+  // ...生产其他
+}
+
+// 于是就变成这样用了
+$fat = new Factory();
+$d = new Demo($fat->createRequest());
+?>
+```
+当然了，上面的工厂还可以继续优化，比如在构造函数里加判断根据传入的参数来生产对象，如`new Factory('request')`那就直接返回request对象了
+。
+好了，到这里，也可以满足许多需求了，但是后来，就发现维护这个工厂方法，
+会变成这样：  
+
+```php
+<?php
+class Factory {
+  public function __construct($className) {
+    if ($className == 'request') {
+      return $this->createRequest();
+    } else if ($className == 'other') {
+      // 其他生产类
+    }
+    // else if (...)
+    
+   // 或者用switch ... case ... 方式来
+  }
+  public createRequest() {
+  // ...
+  }
+  // ...
+}
+?>
+```
+你发现会需要不断的加`if($className == 'request') {...}else {...}`或者维护一个巨大的`switch($className) {case 'request': ...}`。
+所以我们需要一个更加好的方法去管理和生成要注入的对象。  
+
+### 控制反转(IoC)及IoC容器
+为了能更加智能的生产对象，我们需要了解另一个概念，**控制反转及IoC容器**。这个概念和我们上面说到的依赖注入很相似，依赖注入是从应用程序的方面出发，依赖的资源由外部提供并注入到程序中；而控制反转则以外部提供资源的方面来描述，即外部容器反过来向应用程序注入程序需要的资源。简单的说就是一件事情的两个方面的描述。  
+![Ioc/DI示意图](/img/2016-12-15/ioc.git)
+实现方法，上代码：  
+
+```php
+<?php
+class Container {
+  protected $instances;
+  protected $binds;
+
+  public function bind($key, $obj) {
+    if ($obj instanceof Closure) {
+      $this->binds[$key] = $obj;
+    } else {
+      $this->instances[$key] = $obj;
+    }
+  }
+  
+  public function make($name, $params = []) {
+    if (isset($this->instances[$name])) {
+      return $this->instances[$name];
+    }
+    //build an obj
+    array_unshift($params, $this);
+    return call_user_func_array($this->binds[$name], $params);
+    
+  }
+}
+
+//使用例子
+// 绑定到容器
+$container = new Container();
+$container->bind('request1', function() {
+  return new Request();
+});
+// 或者
+$container->bind('request2', new Request());
+
+// 绑定 demo
+$container->bind('Demo', function($container, $module) {
+  return new Demo($container->make($module));
+});
+
+//************************************************
+//使用IoC容器创建对象
+$obj = $container->make('Demo', ['request1']);
+//Request 已被注入进去了
+$obj->handle();
+//生产其他Demo
+$obj = $container->make('Demo', ['request2']);
+// ...
+
+?>
+```
+
+这样一来，如果需要增加新的类，只需要在容器中绑定一个生产方法`bind(name, function | obj)`，就可以到处用`make()`来获得注入好的对象了。通过这种Container获得的对象，就是控制反转了，而这个Container就是IoC容器了。

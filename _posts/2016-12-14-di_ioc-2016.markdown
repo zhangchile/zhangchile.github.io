@@ -84,9 +84,11 @@ $d = new Demo($fat->createRequest());
 ```php
 <?php
 class Factory {
+  public $instance;
+
   public function __construct($className) {
     if ($className == 'request') {
-      return $this->createRequest();
+      $this->createRequest();
     } else if ($className == 'other') {
       // 其他生产类
     }

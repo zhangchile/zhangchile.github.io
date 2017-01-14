@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="baidu-site-verification" content="1r7lKahhT7" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="chile.zhang的博客 | chile.zhang">
+    <meta name="keyword"  content="博客,chile.zhang,前端,js">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>依赖注入DI(Dependence Inject) - chile.zhang的博客 | chile.zhang</title>
+
+    <link rel="canonical" href="http://localhost:4000/2016/12/14/di_ioc-2016/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="http://cdn.staticfile.org/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">chile.zhang</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <!-- Known Issue, found by Hux:
+            <nav>'s height woule be hold on by its content.
+            so, when navbar scale out, the <nav> will cover tags.
+            also mask any touch event of tags, unfortunately.
+        -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/about/">About</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/tags/">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    $toggle.addEventListener('click', handleMagic)
+    function handleMagic(e){
+        if ($navbar.className.indexOf('in') > 0) {
+        // CLOSE
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        }else{
+        // OPEN
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/post-bg-2016.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/post-bg-2016.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#PHP" title="PHP">PHP</a>
+                        
+                    </div>
+                    <h1>依赖注入DI(Dependence Inject)</h1>
+                    
+                    
+                    <h2 class="subheading"></h2>
+                    
+                    <span class="meta">Posted by chile.zhang on December 14, 2016</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<h2 id="section">依赖注入</h2>
+
+<h3 id="section-1">概念</h3>
+<p>首先来搞清楚这个抽象的概念，依赖注入，按照字面的意思，就是把需要的依赖提供给要用的对象上，上代码：</p>
+
+<div class="language-php highlighter-rouge"><pre class="highlight"><code><span class="cp">&lt;?php</span>
+<span class="k">class</span> <span class="nc">Request</span> <span class="p">{</span>
+  <span class="k">public</span> <span class="k">function</span> <span class="nf">getParam</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">echo</span> <span class="s1">'get params'</span><span class="p">;</span>
+  <span class="p">}</span>
+
+<span class="p">}</span>
+
+<span class="k">class</span> <span class="nc">Demo</span> <span class="p">{</span>
+  <span class="k">public</span> <span class="k">function</span> <span class="nf">handle</span><span class="p">(</span><span class="nx">Request</span> <span class="nv">$rq</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">echo</span> <span class="nv">$rq</span><span class="o">-&gt;</span><span class="na">getParam</span><span class="p">();</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+<span class="cp">?&gt;</span>
+</code></pre>
+</div>
+<p><code class="highlighter-rouge">$rq</code>这个变量就是注入进来的对象，这样，handle()这个方法就无需关注<code class="highlighter-rouge">$rq</code>是怎么来的，直接用他的方法就可以了。<br />
+好，现在有了个直观的印象，接下来看看是怎么用的。</p>
+
+<div class="language-php highlighter-rouge"><pre class="highlight"><code><span class="cp">&lt;?php</span>
+<span class="nv">$request</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Request</span><span class="p">();</span>
+<span class="nv">$d</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Demo</span><span class="p">();</span>
+<span class="nv">$d</span><span class="o">-&gt;</span><span class="na">getParam</span><span class="p">(</span><span class="nv">$request</span><span class="p">);</span>
+<span class="cp">?&gt;</span>
+</code></pre>
+</div>
+<p>以上是通过外部注入的，我们再来看另一种注入，构造函数注入</p>
+
+<div class="language-php highlighter-rouge"><pre class="highlight"><code><span class="cp">&lt;?php</span>
+<span class="k">class</span> <span class="nc">Demo</span> <span class="p">{</span>
+  <span class="k">public</span> <span class="nv">$rq</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+  <span class="k">public</span> <span class="k">function</span> <span class="nf">__construct</span><span class="p">(</span><span class="nx">Request</span> <span class="nv">$rq</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">rq</span> <span class="o">=</span> <span class="nv">$rq</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="c1">// ...
+</span><span class="p">}</span>
+<span class="c1">// 调用方式
+</span><span class="nv">$d</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Demo</span><span class="p">(</span><span class="k">new</span> <span class="nx">Request</span><span class="p">());</span>
+<span class="cp">?&gt;</span>
+</code></pre>
+</div>
+<p>以上两种是最简单的注入方式，但往往是很难达到业务需求的，想想，当注入的对象比较多，使用的次数也比较多，那么就需要不断手动去new很多对象，注入到目标对象中，一但要修改，你肯定会傻眼的。<br />
+到这里，应该有许多人有想法了，搞个工厂方法，专门生产这些对象不就好了么
+，是的，上代码：</p>
+
+<div class="language-php highlighter-rouge"><pre class="highlight"><code><span class="cp">&lt;?php</span>
+<span class="k">class</span> <span class="nc">Factory</span> <span class="p">{</span>
+  <span class="k">public</span> <span class="nx">createRequest</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nv">$rq</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Request</span><span class="p">();</span>
+    <span class="nv">$rq</span><span class="o">-&gt;</span><span class="na">length</span> <span class="o">=</span> <span class="nb">count</span><span class="p">(</span><span class="nv">$rq</span><span class="o">-&gt;</span><span class="na">getParam</span><span class="p">());</span>
+    <span class="c1">// $rq-&gt;... 做一些对象初始化之类的操作
+</span>    <span class="k">return</span> <span class="nv">$rq</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="c1">// ...生产其他
+</span><span class="p">}</span>
+
+<span class="c1">// 于是就变成这样用了
+</span><span class="nv">$fat</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Factory</span><span class="p">();</span>
+<span class="nv">$d</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Demo</span><span class="p">(</span><span class="nv">$fat</span><span class="o">-&gt;</span><span class="na">createRequest</span><span class="p">());</span>
+<span class="cp">?&gt;</span>
+</code></pre>
+</div>
+<p>当然了，上面的工厂还可以继续优化，比如在构造函数里加判断根据传入的参数来生产对象，如<code class="highlighter-rouge">new Factory('request')</code>那就直接返回request对象了
+。
+好了，到这里，也可以满足许多需求了，但是后来，就发现维护这个工厂方法，
+会变成这样：</p>
+
+<div class="language-php highlighter-rouge"><pre class="highlight"><code><span class="cp">&lt;?php</span>
+<span class="k">class</span> <span class="nc">Factory</span> <span class="p">{</span>
+  <span class="k">public</span> <span class="nv">$instance</span><span class="p">;</span>
+
+  <span class="k">public</span> <span class="k">function</span> <span class="nf">__construct</span><span class="p">(</span><span class="nv">$className</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nv">$className</span> <span class="o">==</span> <span class="s1">'request'</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">createRequest</span><span class="p">();</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nv">$className</span> <span class="o">==</span> <span class="s1">'other'</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">// 其他生产类
+</span>    <span class="p">}</span>
+    <span class="c1">// else if (...)
+</span>    
+   <span class="c1">// 或者用switch ... case ... 方式来
+</span>  <span class="p">}</span>
+  <span class="k">public</span> <span class="k">function</span> <span class="nf">createRequest</span><span class="p">()</span> <span class="p">{</span>
+  <span class="c1">// ...
+</span>  <span class="p">}</span>
+  <span class="c1">// ...
+</span><span class="p">}</span>
+<span class="cp">?&gt;</span>
+</code></pre>
+</div>
+<p>你发现会需要不断的加<code class="highlighter-rouge">if($className == 'request') {...} else {...}</code>或者维护一个巨大的<code class="highlighter-rouge">switch($className) {case 'request': ...}</code>。
+所以我们需要一个更加好的方法去管理和生成要注入的对象。</p>
+
+<h3 id="iocioc">控制反转(IoC)及IoC容器</h3>
+<p>为了能更加智能的生产对象，我们需要了解另一个概念，<strong>控制反转及IoC容器</strong>。这个概念和我们上面说到的依赖注入很相似，依赖注入是从应用程序的方面出发，依赖的资源由外部提供并注入到程序中；而控制反转则以外部提供资源的方面来描述，即外部容器反过来向应用程序注入程序需要的资源。简单的说就是一件事情的两个方面的描述。<br />
+<img src="/img/in-post/2016-12-14/ioc.gif" alt="Ioc/DI示意图" />
+图片来自网络 <br />
+实现方法，上代码：</p>
+
+<div class="language-php highlighter-rouge"><pre class="highlight"><code><span class="cp">&lt;?php</span>
+<span class="k">class</span> <span class="nc">Container</span> <span class="p">{</span>
+  <span class="k">protected</span> <span class="nv">$instances</span><span class="p">;</span>
+  <span class="k">protected</span> <span class="nv">$binds</span><span class="p">;</span>
+
+  <span class="k">public</span> <span class="k">function</span> <span class="nf">bind</span><span class="p">(</span><span class="nv">$key</span><span class="p">,</span> <span class="nv">$obj</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nv">$obj</span> <span class="nx">instanceof</span> <span class="nx">Closure</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">binds</span><span class="p">[</span><span class="nv">$key</span><span class="p">]</span> <span class="o">=</span> <span class="nv">$obj</span><span class="p">;</span>
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+      <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">instances</span><span class="p">[</span><span class="nv">$key</span><span class="p">]</span> <span class="o">=</span> <span class="nv">$obj</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  
+  <span class="k">public</span> <span class="k">function</span> <span class="nf">make</span><span class="p">(</span><span class="nv">$name</span><span class="p">,</span> <span class="nv">$params</span> <span class="o">=</span> <span class="p">[])</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">isset</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">instances</span><span class="p">[</span><span class="nv">$name</span><span class="p">]))</span> <span class="p">{</span>
+      <span class="k">return</span> <span class="nv">$this</span><span class="o">-&gt;</span><span class="na">instances</span><span class="p">[</span><span class="nv">$name</span><span class="p">];</span>
+    <span class="p">}</span>
+    <span class="c1">//build an obj
+</span>    <span class="nb">array_unshift</span><span class="p">(</span><span class="nv">$params</span><span class="p">,</span> <span class="nv">$this</span><span class="p">);</span>
+    <span class="k">return</span> <span class="nb">call_user_func_array</span><span class="p">(</span><span class="nv">$this</span><span class="o">-&gt;</span><span class="na">binds</span><span class="p">[</span><span class="nv">$name</span><span class="p">],</span> <span class="nv">$params</span><span class="p">);</span>
+    
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="c1">//使用例子
+// 绑定到容器
+</span><span class="nv">$container</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Container</span><span class="p">();</span>
+<span class="nv">$container</span><span class="o">-&gt;</span><span class="na">bind</span><span class="p">(</span><span class="s1">'request1'</span><span class="p">,</span> <span class="k">function</span><span class="p">()</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="k">new</span> <span class="nx">Request</span><span class="p">();</span>
+<span class="p">});</span>
+<span class="c1">// 或者
+</span><span class="nv">$container</span><span class="o">-&gt;</span><span class="na">bind</span><span class="p">(</span><span class="s1">'request2'</span><span class="p">,</span> <span class="k">new</span> <span class="nx">Request</span><span class="p">());</span>
+
+<span class="c1">// 绑定 demo
+</span><span class="nv">$container</span><span class="o">-&gt;</span><span class="na">bind</span><span class="p">(</span><span class="s1">'Demo'</span><span class="p">,</span> <span class="k">function</span><span class="p">(</span><span class="nv">$container</span><span class="p">,</span> <span class="nv">$module</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">return</span> <span class="k">new</span> <span class="nx">Demo</span><span class="p">(</span><span class="nv">$container</span><span class="o">-&gt;</span><span class="na">make</span><span class="p">(</span><span class="nv">$module</span><span class="p">));</span>
+<span class="p">});</span>
+
+<span class="c1">//************************************************
+//使用IoC容器创建对象
+</span><span class="nv">$obj</span> <span class="o">=</span> <span class="nv">$container</span><span class="o">-&gt;</span><span class="na">make</span><span class="p">(</span><span class="s1">'Demo'</span><span class="p">,</span> <span class="p">[</span><span class="s1">'request1'</span><span class="p">]);</span>
+<span class="c1">//Request 已被注入进去了
+</span><span class="nv">$obj</span><span class="o">-&gt;</span><span class="na">handle</span><span class="p">();</span>
+<span class="c1">//生产其他Demo
+</span><span class="nv">$obj</span> <span class="o">=</span> <span class="nv">$container</span><span class="o">-&gt;</span><span class="na">make</span><span class="p">(</span><span class="s1">'Demo'</span><span class="p">,</span> <span class="p">[</span><span class="s1">'request2'</span><span class="p">]);</span>
+<span class="c1">// ...
+</span>
+<span class="cp">?&gt;</span>
+</code></pre>
+</div>
+
+<p>这样一来，如果需要增加新的类，只需要在容器中绑定一个生产方法<code class="highlighter-rouge">bind(name, function | obj)</code>，就可以到处用<code class="highlighter-rouge">make()</code>来获得注入好的对象了。通过这种Container获得的对象，就是控制反转了，而这个Container就是IoC容器了。</p>
+
+
+                <hr>
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2016/12/12/understand_this-2016/" data-toggle="tooltip" data-placement="top" title="理解js中的this">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2017/01/15/js_regex_keng-2017/" data-toggle="tooltip" data-placement="top" title="javascript正则[/g]标志的那些坑">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+
+                
+
+                
+
+            </div>
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <!-- <hr class="hidden-sm hidden-xs"> -->
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Javascript" title="Javascript" rel="4">
+                                    Javascript
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#前端" title="前端" rel="4">
+                                    前端
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+        			</div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/chilezhang">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+
+
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/zhangchile">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; chile.zhang 2017
+                    <br>
+                    Theme by <a href="http://huangxuan.me">Hux</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js "></script>
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- 
+     Because of the native support for backtick-style fenced code blocks 
+     right within the Markdown is landed in Github Pages, 
+     From V1.6, There is no need for Highlight.js, 
+     so Huxblog drops it officially.
+
+     - https://github.com/blog/2100-github-pages-now-faster-and-simpler-with-jekyll-3-0  
+     - https://help.github.com/articles/creating-and-highlighting-code-blocks/    
+-->
+<!--
+    <script>
+        async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+            hljs.initHighlightingOnLoad();
+        })
+    </script>
+    <link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+-->
+
+
+<!-- jquery.tagcloud.js -->
+<script>
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        var $nav = document.querySelector("nav");
+        if($nav) FastClick.attach($nav);
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic
+    var _baId = 'abf002c8247c56a6428fc9d5167b38a1';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

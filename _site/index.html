@@ -154,6 +154,127 @@
             ">
     			
 <div class="post-preview">
+    <a href="/2017/01/15/js_regex_keng-2017/">
+        <h2 class="post-title">
+            javascript正则[/g]标志的那些坑
+        </h2>
+        
+        <h3 class="post-subtitle">
+            
+        </h3>
+        
+        <div class="post-content-preview">
+            javascript正则[/g]标志的坑
+
+regexp.test()函数
+
+var str = '_a_a';
+var regex = /a/g;
+regex.test(str);
+
+
+
+这里要十分注意的是test()每次调用都会从上一次匹配的位置之后开始进行下一次进行匹配，初次执行的时的位置就是0，可以通过regex.lastIndex的值来查看当前的位置。上代码
+
+&gt; var r...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by chile.zhang on January 15, 2017
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
+    <a href="/2016/12/14/di_ioc-2016/">
+        <h2 class="post-title">
+            依赖注入DI(Dependence Inject)
+        </h2>
+        
+        <h3 class="post-subtitle">
+            
+        </h3>
+        
+        <div class="post-content-preview">
+            依赖注入
+
+概念
+首先来搞清楚这个抽象的概念，依赖注入，按照字面的意思，就是把需要的依赖提供给要用的对象上，上代码：
+
+&lt;?php
+class Request {
+  public function getParam() {
+    echo 'get params';
+  }
+
+}
+
+class Demo {
+  public function handle(Request $rq)...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by chile.zhang on December 14, 2016
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
+    <a href="/2016/12/12/understand_this-2016/">
+        <h2 class="post-title">
+            理解js中的this
+        </h2>
+        
+        <h3 class="post-subtitle">
+            
+        </h3>
+        
+        <div class="post-content-preview">
+            理解js中的this
+以前写代码，对this的了解还是比较简单，比如在window下面this都是window，在一个function里this就是这个function，真的不清楚就直接console.log(this)看看，这些都是从表面现象得出的结论。但是后来理解了JavaScript函数执行方式，对this就永远不会困惑了。
+先来看一段代码：
+
+var obj = {
+  foo: f...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by chile.zhang on December 12, 2016
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
+    <a href="/2016/12/06/js_module_loaders-2016/">
+        <h2 class="post-title">
+            模块加载器的一些理解
+        </h2>
+        
+        <h3 class="post-subtitle">
+            
+        </h3>
+        
+        <div class="post-content-preview">
+            模块加载器的一些理解
+在日常工作中接触到一些模块加载，对比了一下，随便写写。
+
+Sea.js
+
+factory执行的时机
+seajs是玉伯大神的作品，在我工作中也经常用到，这个模块加载器主要解决了两个问题：一个是命名冲突，模块依赖的问题；另一个是模块的加载和执行。
+基本用法：
+
+define(function (require, exports, module) {
+  var foo = ...
+        </div>
+    </a>
+    <p class="post-meta">
+        Posted by chile.zhang on December 6, 2016
+    </p>
+</div>
+<hr>
+
+<div class="post-preview">
     <a href="/2016/11/28/js_module_anlys-2016/">
         <h2 class="post-title">
             模块化加载标准的理解
@@ -230,6 +351,24 @@ define(string id?, array dependencies?, Object|Function factory);
                     <hr class="hidden-sm hidden-xs">
                     <h5><a href="/tags/">FEATURED TAGS</a></h5>
                     <div class="tags">
+                        
+                            
+                        
+                            
+                                <a href="/tags/#Javascript" title="Javascript" rel="4">
+                                    Javascript
+                                </a>
+                            
+                        
+                            
+                                <a href="/tags/#前端" title="前端" rel="4">
+                                    前端
+                                </a>
+                            
+                        
+                            
+                        
+                            
                         
                             
                         
@@ -322,7 +461,7 @@ define(string id?, array dependencies?, Object|Function factory);
                     
                 </ul>
                 <p class="copyright text-muted">
-                    Copyright &copy; chile.zhang 2016
+                    Copyright &copy; chile.zhang 2017
                     <br>
                     Theme by <a href="http://huangxuan.me">Hux</a>
                 </p>

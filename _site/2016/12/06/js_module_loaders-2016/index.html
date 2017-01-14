@@ -10,9 +10,9 @@
     <meta name="keyword"  content="博客,chile.zhang,前端,js">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
-    <title>模块化加载标准的理解 - chile.zhang的博客 | chile.zhang</title>
+    <title>模块加载器的一些理解 - chile.zhang的博客 | chile.zhang</title>
 
-    <link rel="canonical" href="http://localhost:4000/2016/11/28/js_module_anlys-2016/">
+    <link rel="canonical" href="http://localhost:4000/2016/12/06/js_module_loaders-2016/">
 
     <!-- Bootstrap Core CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css">
@@ -142,15 +142,17 @@
                         
                         <a class="tag" href="/tags/#Javascript" title="Javascript">Javascript</a>
                         
+                        <a class="tag" href="/tags/#模块化" title="模块化">模块化</a>
+                        
                         <a class="tag" href="/tags/#前端" title="前端">前端</a>
                         
                     </div>
-                    <h1>模块化加载标准的理解</h1>
+                    <h1>模块加载器的一些理解</h1>
                     
                     
                     <h2 class="subheading"></h2>
                     
-                    <span class="meta">Posted by chile.zhang on November 28, 2016</span>
+                    <span class="meta">Posted by chile.zhang on December 6, 2016</span>
                 </div>
             </div>
         </div>
@@ -168,76 +170,100 @@
                 col-md-10 col-md-offset-1
                 post-container">
 
-				<h2 id="section">模块化加载标准的理解</h2>
+				<h2 id="section">模块加载器的一些理解</h2>
+<p>在日常工作中接触到一些模块加载，对比了一下，随便写写。</p>
 
-<h3 id="amdmodulesasynchronousdefinition">AMD（Modules/AsynchronousDefinition）标准</h3>
-<p>在这个标准中，模块的加载都是提前异步加载的，模块中的变量都是包裹在一个函数define()中的，基本定义是这样的：</p>
+<h3 id="seajs">Sea.js</h3>
 
-<div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="nx">define</span><span class="p">(</span><span class="nx">string</span> <span class="nx">id</span><span class="p">?,</span> <span class="nx">array</span> <span class="nx">dependencies</span><span class="p">?,</span> <span class="nb">Object</span><span class="o">|</span><span class="nb">Function</span> <span class="nx">factory</span><span class="p">);</span>
-</code></pre>
-</div>
-<p>其中id（模块标识），dependencies（依赖模块）是可选的参数，而factory是具体的功能函数或对象。
-依赖会在执行factory前加载完成，factory是依赖加载后的回调，依赖的对象会依次注入到factory中。
-一个完整的例子是这样的：</p>
+<p><strong>factory执行的时机</strong><br />
+seajs是玉伯大神的作品，在我工作中也经常用到，这个模块加载器主要解决了两个问题：一个是命名冲突，模块依赖的问题；另一个是模块的加载和执行。<br />
+基本用法：</p>
 
-<div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="nx">define</span><span class="p">([</span><span class="nx">dependence</span><span class="p">],</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">dependence</span><span class="p">)</span> <span class="p">{</span>
-  <span class="c1">// use dependence obj to do something</span>
-  <span class="c1">// dependence.foo()...</span>
-  <span class="k">return</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'hello'</span><span class="p">);</span>
+<div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="nx">define</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">require</span><span class="p">,</span> <span class="nx">exports</span><span class="p">,</span> <span class="nx">module</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">foo</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'foo'</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">foo</span><span class="p">.</span><span class="nx">val</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">select</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'select1'</span><span class="p">);</span>
+  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">select</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'select2'</span><span class="p">);</span>
   <span class="p">}</span>
-<span class="p">}</span>
-</code></pre>
-</div>
-<ul>
-  <li>所有的依赖都是提前加载的，即便没有用到也会加载。</li>
-  <li>包裹在define里可以很好的避免全局污染</li>
-</ul>
-
-<p>实现这个标准且用得比较多的加载器：</p>
-<ol>
-  <li><a href="http://requirejs.org/">RequireJS</a></li>
-  <li><a href="https://github.com/cujojs/curl/">curl.js</a></li>
-  <li><a href="http://dojotoolkit.org/reference-guide/1.10/loader/">Dojo</a></li>
-</ol>
-
-<h3 id="moduleswrappings-">Modules/Wrappings 标准</h3>
-<p>在这个规范中，模块加载是无需提前加载的，可以在模块的factory中按需加载的，这样可以大大的提高加载性能。</p>
-
-<p>这个标准目的是为了解决浏览器端的模块加载问题，多数情况下浏览器加载js文件是通过XMLHttpRequest或者动态插入scrip标签来加载的，
-XMLHttpRequest是限制了同源策略，而动态插入的会无法共享同一个上下文，所以有了这个浏览器端模块加载器解决方案。<br />
-基本定义：</p>
-
-<div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="nx">module</span><span class="p">.</span><span class="nx">declear</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">require</span><span class="p">,</span> <span class="nx">exports</span><span class="p">,</span> <span class="nx">module</span><span class="p">)</span> <span class="p">{</span>
-  <span class="nx">exports</span><span class="p">.</span><span class="nx">foo</span> <span class="o">=</span> <span class="s2">"foo"</span><span class="p">;</span>
+  <span class="nx">exports</span><span class="p">.</span><span class="nx">hello</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">select</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="nx">module</span><span class="p">.</span><span class="nx">exports</span><span class="p">.</span><span class="nx">obj</span> <span class="o">=</span> <span class="p">{}</span>
+  <span class="c1">// ...</span>
 <span class="p">});</span>
 </code></pre>
 </div>
-<p>Sea.js参考的是这个规范，但也做些了变体，如将module.declear改为了define，并成为CMD规范。</p>
-
-<h3 id="commonjs">CommonJS规范</h3>
-<p>这个规范最重要的是加载的时候是同步的，外围没有函数包裹，可以理解一个模块是一段可重用的代码。主要包含两部分，一个是exports的自由变量，它包含模块希望提供给其它模块的对象；以及一个 require 函数，让模块用来导入其它模块的导出。
-基本定义：</p>
-
-<div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">foo1</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'foo1'</span><span class="p">);</span>
-<span class="kd">var</span> <span class="nx">foo2</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'foo2'</span><span class="p">);</span>
-<span class="kd">var</span> <span class="nx">func</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-  <span class="k">return</span> <span class="nx">foo1</span> <span class="o">+</span> <span class="nx">foo2</span><span class="p">;</span>
-<span class="p">}</span>
-<span class="c1">// ...</span>
-<span class="nx">exports</span> <span class="o">=</span> <span class="nx">func</span><span class="p">;</span>
-</code></pre>
-</div>
-
 <ul>
-  <li>require是同步加载的，只有foo1加载完成了才会继续加载foo2模块，目的是解决服务端的模块同步加载问题</li>
+  <li>select的值是根据条件执行的，就是说虽然模块(select1,select2)都下载好了，但是并没有执行factory，预下载，按需执行，更“懒”一些，启动得快了，但也会降低了一点执行的性能。</li>
 </ul>
 
-<p>Node.js使用的是这个规范。</p>
+<p><strong>理念</strong><br />
+根据官网的说法，SeaJS是努力保持简单，专注做浏览器的模块加载。</p>
 
-<p>参考:<br />
-[1].<a href="http://wiki.commonjs.org/wiki/Modules/Wrappings">Modules Wrappings</a><br />
-[2].<a href="http://wiki.commonjs.org/wiki/Modules/AsynchronousDefinition">Modules AsynchronousDefinition</a></p>
+<h3 id="requirejs">Require.js</h3>
+
+<p><strong>factory执行的时机</strong><br />
+遵循AMD（异步模块定义）规范，提前加载并执行依赖模块的factory，输出顺序取决于哪个js先加载完或者有指定依赖顺序的以依赖顺序为准。目标是类似于是把执行环境准备好，然后才开始执行。 
+基本用法：</p>
+
+<div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="nx">define</span><span class="p">([</span><span class="s1">'dep1'</span><span class="p">,</span> <span class="s1">'dep2'</span><span class="p">],</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">dep1</span><span class="p">,</span> <span class="nx">dep2</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">foo</span> <span class="o">=</span> <span class="nx">dep1</span><span class="p">.</span><span class="nx">val</span><span class="p">;</span>
+  <span class="c1">// ...</span>
+  <span class="k">return</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="nx">foo</span><span class="p">;</span>
+  <span class="p">};</span>
+<span class="p">});</span>
+</code></pre>
+</div>
+<p>如果dep2模块出现了问题，那么在加载的时候就会报错，从而不会执行当前factory函数，但是在seajs中，dep1执行了，而dep2在执行的时候报错了，就可能需要回滚dep1的操作了。</p>
+
+<p><strong>理念</strong><br />
+RequireJS 有一系列插件，功能很强大，但破坏了模块加载器的纯粹性。</p>
+
+<h3 id="webpack">Webpack</h3>
+<p>webpack是一个模块打包工具，其可以兼容多种js书写规范（AMD,CMD等），且可以处理模块间的依赖关系，具有更强大的js模块化的功能。官网中用下图描述了webpack采用不同的loader加载不同的资源文件，打包生成多个js文件，也可以根据设置生成独立的图片、css文件等。<br />
+<img src="/img/in-post/2016-12-06/webpack.jpg" alt="webpack" /></p>
+
+<p>在Webpack当中，所有的资源都被当作是模块，js，css，图片等等…<br />
+因此，Webpack当中js可以引用css，css中可以嵌入图片dataUrl</p>
+
+<p>对应各种不同文件类型的资源，Webpack有对应的模块loader<br />
+比如CoffeeScript用的是coffee-loader</p>
+
+<p>大致的写法是这样子的:</p>
+
+<div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="nx">module</span><span class="p">.</span><span class="nx">exports</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">entry</span><span class="p">:[</span>
+    <span class="s1">'./entry.js'</span><span class="p">,</span>
+    <span class="c1">// ...</span>
+  <span class="p">],</span>
+  <span class="na">output</span><span class="p">:</span> <span class="p">{</span>
+    <span class="na">path</span><span class="p">:</span> <span class="nx">__dirname</span> <span class="o">+</span> <span class="s1">'/output/'</span><span class="p">,</span>
+    <span class="na">publicPath</span><span class="p">:</span> <span class="s2">"/output/"</span><span class="p">,</span>
+    <span class="na">filename</span><span class="p">:</span> <span class="s1">'result.js'</span>
+  <span class="p">},</span>
+  <span class="na">module</span><span class="p">:</span> <span class="p">{</span>
+      <span class="na">loaders</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span> <span class="na">test</span><span class="p">:</span> <span class="sr">/</span><span class="se">\.</span><span class="sr">css$/</span><span class="p">,</span> <span class="na">loader</span><span class="p">:</span> <span class="s1">'style-loader!css-loader'</span> <span class="p">},</span>
+      <span class="p">],</span>
+  <span class="p">},</span>
+<span class="p">};</span>
+</code></pre>
+</div>
+<ul>
+  <li>其中entry参数定义了打包后的入口文件，数组中的所有文件会打包生成一个filename文件</li>
+  <li>output参数定义了输出文件的位置及名字，其中参数path是指文件的绝对路径，publicPath是指访问路径，filename是指输出的文件名。</li>
+  <li>module.loaders 定义了每个模块加载的解析器，所以，被模块化的不止是js了。</li>
+</ul>
+
+<p>Webpack既是打包工具，又可以做模块加载器，做压缩，并可以加入gulp工作流，非常强大。</p>
+
+<p>参考：<br />
+[1]. <a href="http://webpack.github.io/docs/">webpack</a><br />
+[2]. <a href="http://seajs.org/docs/#docs">Sea.js</a><br />
+[3]. <a href="http://requirejs.org/">RequireJs</a></p>
+
 
 
                 <hr>
@@ -248,12 +274,12 @@ XMLHttpRequest是限制了同源策略，而动态插入的会无法共享同一
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/2016/11/08/welcome-2016/" data-toggle="tooltip" data-placement="top" title="welcome to my blog">&larr; Previous Post</a>
+                        <a href="/2016/11/28/js_module_anlys-2016/" data-toggle="tooltip" data-placement="top" title="模块化加载标准的理解">&larr; Previous Post</a>
                     </li>
                     
                     
                     <li class="next">
-                        <a href="/2016/12/06/js_module_loaders-2016/" data-toggle="tooltip" data-placement="top" title="模块加载器的一些理解">Next Post &rarr;</a>
+                        <a href="/2016/12/12/understand_this-2016/" data-toggle="tooltip" data-placement="top" title="理解js中的this">Next Post &rarr;</a>
                     </li>
                     
                 </ul>

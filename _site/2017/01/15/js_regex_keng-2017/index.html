@@ -10,9 +10,9 @@
     <meta name="keyword"  content="博客,chile.zhang,前端,js">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
-    <title>模块化加载标准的理解 - chile.zhang的博客 | chile.zhang</title>
+    <title>javascript正则[/g]标志的那些坑 - chile.zhang的博客 | chile.zhang</title>
 
-    <link rel="canonical" href="http://localhost:4000/2016/11/28/js_module_anlys-2016/">
+    <link rel="canonical" href="http://localhost:4000/2017/01/15/js_regex_keng-2017/">
 
     <!-- Bootstrap Core CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css">
@@ -140,17 +140,19 @@
                 <div class="post-heading">
                     <div class="tags">
                         
+                        <a class="tag" href="/tags/#正则" title="正则">正则</a>
+                        
                         <a class="tag" href="/tags/#Javascript" title="Javascript">Javascript</a>
                         
                         <a class="tag" href="/tags/#前端" title="前端">前端</a>
                         
                     </div>
-                    <h1>模块化加载标准的理解</h1>
+                    <h1>javascript正则[/g]标志的那些坑</h1>
                     
                     
                     <h2 class="subheading"></h2>
                     
-                    <span class="meta">Posted by chile.zhang on November 28, 2016</span>
+                    <span class="meta">Posted by chile.zhang on January 15, 2017</span>
                 </div>
             </div>
         </div>
@@ -168,76 +170,110 @@
                 col-md-10 col-md-offset-1
                 post-container">
 
-				<h2 id="section">模块化加载标准的理解</h2>
+				<h2 id="javascriptg">javascript正则[/g]标志的坑</h2>
 
-<h3 id="amdmodulesasynchronousdefinition">AMD（Modules/AsynchronousDefinition）标准</h3>
-<p>在这个标准中，模块的加载都是提前异步加载的，模块中的变量都是包裹在一个函数define()中的，基本定义是这样的：</p>
+<h3 id="regexptest">regexp.test()函数</h3>
 
-<div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="nx">define</span><span class="p">(</span><span class="nx">string</span> <span class="nx">id</span><span class="p">?,</span> <span class="nx">array</span> <span class="nx">dependencies</span><span class="p">?,</span> <span class="nb">Object</span><span class="o">|</span><span class="nb">Function</span> <span class="nx">factory</span><span class="p">);</span>
+<div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">str</span> <span class="o">=</span> <span class="s1">'_a_a'</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">regex</span> <span class="o">=</span> <span class="sr">/a/g</span><span class="p">;</span>
+<span class="nx">regex</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">str</span><span class="p">);</span>
 </code></pre>
 </div>
-<p>其中id（模块标识），dependencies（依赖模块）是可选的参数，而factory是具体的功能函数或对象。
-依赖会在执行factory前加载完成，factory是依赖加载后的回调，依赖的对象会依次注入到factory中。
-一个完整的例子是这样的：</p>
 
-<div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="nx">define</span><span class="p">([</span><span class="nx">dependence</span><span class="p">],</span> <span class="kd">function</span> <span class="p">(</span><span class="nx">dependence</span><span class="p">)</span> <span class="p">{</span>
-  <span class="c1">// use dependence obj to do something</span>
-  <span class="c1">// dependence.foo()...</span>
-  <span class="k">return</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'hello'</span><span class="p">);</span>
+<p>这里要十分注意的是<code class="highlighter-rouge">test()</code>每次调用都会从上一次匹配的位置之后开始进行下一次进行匹配，初次执行的时的位置就是0，可以通过regex.lastIndex的值来查看当前的位置。上代码</p>
+
+<div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="o">&gt;</span> <span class="kd">var</span> <span class="nx">regex</span> <span class="o">=</span> <span class="sr">/a/g</span><span class="p">;</span>
+<span class="o">&gt;</span> <span class="nx">regex</span><span class="p">.</span><span class="nx">lastIndex</span>
+<span class="mi">0</span>
+<span class="o">&gt;</span> <span class="nx">regex</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span>
+<span class="kc">true</span>
+<span class="o">&gt;</span> <span class="nx">regex</span><span class="p">.</span><span class="nx">lastIndex</span>
+<span class="mi">2</span>
+<span class="o">&gt;</span> <span class="nx">regex</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span>
+<span class="kc">true</span>
+<span class="o">&gt;</span> <span class="nx">regex</span><span class="p">.</span><span class="nx">lastIndex</span>
+<span class="mi">4</span>
+<span class="o">&gt;</span> <span class="nx">regex</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span>
+<span class="kc">false</span>
+</code></pre>
+</div>
+
+<p>以上的特性，如果不小心用在while里来计算匹配了多少个，可能会导致死循环。</p>
+<div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="c1">// 不要运行这段代码，会死循环</span>
+<span class="kd">var</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="k">while</span><span class="p">(</span><span class="sr">/a/g</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">str</span><span class="p">))</span> <span class="nx">count</span><span class="o">++</span><span class="p">;</span>
+</code></pre>
+</div>
+
+<p>上面的代码里/a/g.test(str)每次调用都会创建一个新的regex对象，导致test函数返回结果永远为真。
+正确的写法应该是</p>
+<div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">regex</span> <span class="o">=</span> <span class="sr">/a/g</span><span class="p">;</span>
+<span class="k">while</span><span class="p">(</span><span class="nx">regex</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">str</span><span class="p">))</span> <span class="nx">count</span><span class="o">++</span><span class="p">;</span>
+</code></pre>
+</div>
+<p>或者其实用String.prototype.match()更加好，这个会返回匹配到的值，直接取结果的length就好。<br />
+当正则为参数传入函数时也要注意这个问题</p>
+<div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">countMatch</span><span class="p">(</span><span class="nx">regex</span><span class="p">,</span> <span class="nx">str</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="k">while</span><span class="p">(</span><span class="nx">regex</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">str</span><span class="p">))</span> <span class="nx">count</span><span class="o">++</span><span class="p">;</span>
+  <span class="k">return</span> <span class="nx">count</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre>
+</div>
+<p>上面的函数如果传入的正则不包含/g，同样也会导致死循环，或者说正则在传进来之前lastIndex就不为0的，那计算的值就是不准确的。<br />
+好的处理方法应该是</p>
+<div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">countMatch</span><span class="p">(</span><span class="nx">regex</span><span class="p">,</span> <span class="nx">str</span><span class="p">)</span> <span class="p">{</span>
+  <span class="kd">var</span> <span class="nx">originalIndex</span> <span class="o">=</span> <span class="nx">regex</span><span class="p">.</span><span class="nx">lastIndex</span><span class="p">;</span>
+  <span class="nx">regex</span><span class="p">.</span><span class="nx">lastIndex</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="c1">// 重置为0</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">regex</span><span class="p">.</span><span class="nx">global</span><span class="p">)</span> <span class="p">{</span>
+    <span class="c1">// 没有/g标志</span>
+    <span class="k">return</span> <span class="nx">regex</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span><span class="o">*</span><span class="mi">1</span><span class="p">;</span>
   <span class="p">}</span>
+  <span class="k">while</span><span class="p">(</span><span class="nx">regex</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">str</span><span class="p">))</span> <span class="nx">count</span><span class="o">++</span><span class="p">;</span>
+  <span class="k">return</span> <span class="nx">count</span><span class="p">;</span> 
 <span class="p">}</span>
 </code></pre>
 </div>
-<ul>
-  <li>所有的依赖都是提前加载的，即便没有用到也会加载。</li>
-  <li>包裹在define里可以很好的避免全局污染</li>
-</ul>
-
-<p>实现这个标准且用得比较多的加载器：</p>
-<ol>
-  <li><a href="http://requirejs.org/">RequireJS</a></li>
-  <li><a href="https://github.com/cujojs/curl/">curl.js</a></li>
-  <li><a href="http://dojotoolkit.org/reference-guide/1.10/loader/">Dojo</a></li>
-</ol>
-
-<h3 id="moduleswrappings-">Modules/Wrappings 标准</h3>
-<p>在这个规范中，模块加载是无需提前加载的，可以在模块的factory中按需加载的，这样可以大大的提高加载性能。</p>
-
-<p>这个标准目的是为了解决浏览器端的模块加载问题，多数情况下浏览器加载js文件是通过XMLHttpRequest或者动态插入scrip标签来加载的，
-XMLHttpRequest是限制了同源策略，而动态插入的会无法共享同一个上下文，所以有了这个浏览器端模块加载器解决方案。<br />
-基本定义：</p>
-
-<div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="nx">module</span><span class="p">.</span><span class="nx">declear</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">require</span><span class="p">,</span> <span class="nx">exports</span><span class="p">,</span> <span class="nx">module</span><span class="p">)</span> <span class="p">{</span>
-  <span class="nx">exports</span><span class="p">.</span><span class="nx">foo</span> <span class="o">=</span> <span class="s2">"foo"</span><span class="p">;</span>
-<span class="p">});</span>
-</code></pre>
-</div>
-<p>Sea.js参考的是这个规范，但也做些了变体，如将module.declear改为了define，并成为CMD规范。</p>
-
-<h3 id="commonjs">CommonJS规范</h3>
-<p>这个规范最重要的是加载的时候是同步的，外围没有函数包裹，可以理解一个模块是一段可重用的代码。主要包含两部分，一个是exports的自由变量，它包含模块希望提供给其它模块的对象；以及一个 require 函数，让模块用来导入其它模块的导出。
-基本定义：</p>
-
-<div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">foo1</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'foo1'</span><span class="p">);</span>
-<span class="kd">var</span> <span class="nx">foo2</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">'foo2'</span><span class="p">);</span>
-<span class="kd">var</span> <span class="nx">func</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
-  <span class="k">return</span> <span class="nx">foo1</span> <span class="o">+</span> <span class="nx">foo2</span><span class="p">;</span>
+<p>或者直接用match函数来完成这个功能</p>
+<div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="kd">function</span> <span class="nx">countMatch</span><span class="p">(</span><span class="nx">regex</span><span class="p">,</span> <span class="nx">str</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="nx">str</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span><span class="nx">str</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="nx">regex</span><span class="p">)</span> <span class="o">||</span> <span class="p">[]</span> <span class="p">).</span><span class="nx">length</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
 <span class="p">}</span>
-<span class="c1">// ...</span>
-<span class="nx">exports</span> <span class="o">=</span> <span class="nx">func</span><span class="p">;</span>
 </code></pre>
 </div>
 
-<ul>
-  <li>require是同步加载的，只有foo1加载完成了才会继续加载foo2模块，目的是解决服务端的模块同步加载问题</li>
-</ul>
+<h3 id="regexpexec">regexp.exec()函数</h3>
 
-<p>Node.js使用的是这个规范。</p>
+<p>exec()函数跟test()的操作流程挺像，只不过在找到了第一个匹配值后，是返回这个值，并附带index和input属性，而不是返回boolean，并把lastIndex的值设为最后匹配的值的位置后一位，直到最后没有可以匹配的，会返回null，并把lastIndex设为0；</p>
+<div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">regex</span> <span class="o">=</span> <span class="sr">/a/g</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">str</span> <span class="o">=</span> <span class="s1">'_a_a'</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">result</span><span class="p">;</span>
+<span class="k">while</span><span class="p">(</span> <span class="p">(</span><span class="nx">result</span><span class="o">=</span><span class="nx">regex</span><span class="p">.</span><span class="nx">exec</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span> <span class="p">)</span> <span class="o">!=</span> <span class="kc">null</span> <span class="p">)</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">result</span><span class="p">);</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">regex</span><span class="p">.</span><span class="nx">lastIndex</span><span class="p">);</span>
+<span class="p">}</span>
 
-<p>参考:<br />
-[1].<a href="http://wiki.commonjs.org/wiki/Modules/Wrappings">Modules Wrappings</a><br />
-[2].<a href="http://wiki.commonjs.org/wiki/Modules/AsynchronousDefinition">Modules AsynchronousDefinition</a></p>
+<span class="c1">// ["a", index: 1, input: "_a_a"] 2</span>
+<span class="c1">// ["a", index: 3, input: "_a_a"] 4</span>
+</code></pre>
+</div>
+
+<h3 id="stringprototypematch">String.prototype.match()函数</h3>
+<p>match()函数是直接返回匹配到的值并转为数组如果有的话，否则是会返回null的。</p>
+<div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="o">&gt;</span> <span class="s1">'_a_a'</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/a/</span><span class="p">)</span>
+<span class="o">&gt;</span> <span class="p">[</span><span class="s2">"a"</span><span class="p">]</span>
+
+<span class="o">&gt;</span> <span class="s1">'_a_a'</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/a/g</span><span class="p">)</span>
+<span class="o">&gt;</span> <span class="p">[</span><span class="s2">"a"</span><span class="p">,</span> <span class="s2">"a"</span><span class="p">]</span>
+
+<span class="o">&gt;</span> <span class="s1">'_a_a'</span><span class="p">.</span><span class="nx">match</span><span class="p">(</span><span class="sr">/b/g</span><span class="p">)</span>
+<span class="o">&gt;</span> <span class="kc">null</span>
+
+</code></pre>
+</div>
 
 
                 <hr>
@@ -248,13 +284,9 @@ XMLHttpRequest是限制了同源策略，而动态插入的会无法共享同一
                 <ul class="pager">
                     
                     <li class="previous">
-                        <a href="/2016/11/08/welcome-2016/" data-toggle="tooltip" data-placement="top" title="welcome to my blog">&larr; Previous Post</a>
+                        <a href="/2016/12/14/di_ioc-2016/" data-toggle="tooltip" data-placement="top" title="依赖注入DI(Dependence Inject)">&larr; Previous Post</a>
                     </li>
                     
-                    
-                    <li class="next">
-                        <a href="/2016/12/06/js_module_loaders-2016/" data-toggle="tooltip" data-placement="top" title="模块加载器的一些理解">Next Post &rarr;</a>
-                    </li>
                     
                 </ul>
 

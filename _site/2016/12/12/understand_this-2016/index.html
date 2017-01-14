@@ -10,9 +10,9 @@
     <meta name="keyword"  content="博客,chile.zhang,前端,js">
     <link rel="shortcut icon" href="/img/favicon.ico">
 
-    <title>About - chile.zhang的博客 | chile.zhang</title>
+    <title>理解js中的this - chile.zhang的博客 | chile.zhang</title>
 
-    <link rel="canonical" href="http://localhost:4000/about/">
+    <link rel="canonical" href="http://localhost:4000/2016/12/12/understand_this-2016/">
 
     <!-- Bootstrap Core CSS -->
     <link rel="stylesheet" href="/css/bootstrap.min.css">
@@ -123,133 +123,211 @@
 </script>
 
 
-    <!-- Page Header -->
-<header class="intro-header" style="background-image: url('/img/about-bg.jpg')">
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/post-bg-2016.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/post-bg-2016.jpg')
+    }
+</style>
+<header class="intro-header" >
     <div class="container">
         <div class="row">
-            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 ">
-                <div class="site-heading">
-                    <h1>About</h1>
-                    <!--<hr class="small">-->
-                    <span class="subheading">I'm who i am</span>
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#Javascript" title="Javascript">Javascript</a>
+                        
+                        <a class="tag" href="/tags/#前端" title="前端">前端</a>
+                        
+                        <a class="tag" href="/tags/#this" title="this">this</a>
+                        
+                    </div>
+                    <h1>理解js中的this</h1>
+                    
+                    
+                    <h2 class="subheading"></h2>
+                    
+                    <span class="meta">Posted by chile.zhang on December 12, 2016</span>
                 </div>
             </div>
         </div>
     </div>
 </header>
 
-<!-- Main Content -->
-<div class="container">
-	<div class="row">
-        
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
 
-<!-- USE SIDEBAR -->
     <!-- Post Container -->
-    		<div class="
-                col-lg-8 col-lg-offset-1
-                col-md-8 col-md-offset-1
-                col-sm-12
-                col-xs-12
-                post-container
-            ">
-    			<div class="zh post-container">
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
 
-    <blockquote>
-        世界这么大，不和自己爱的人去看看，就老了啦
-    </blockquote>
-    Hi，我来自广州，很小的时候就觉得电脑是个很神奇的东西，大学接触了web开发，从写网页开始，越陷越深，从此走上了不归路。
-    <p>目前是PHP开发工程师，就职于YY，热爱前端技术，在不断学习进步中。</p>
-    <p>喜欢户外徒步，世界这么大，再不去走走，不去玩玩，老了就走不动了啦。</p>
+				<h2 id="jsthis">理解js中的this</h2>
+<p>以前写代码，对this的了解还是比较简单，比如在window下面this都是window，在一个function里this就是这个function，真的不清楚就直接console.log(this)看看，这些都是从表面现象得出的结论。但是后来理解了JavaScript函数执行方式，对this就永远不会困惑了。<br />
+先来看一段代码：</p>
+
+<div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">obj</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="na">foo</span><span class="p">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s2">"obj.foo() called"</span><span class="p">);</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="k">this</span><span class="p">);</span><span class="c1">// foo</span>
+  <span class="p">}</span>
+<span class="p">};</span>
+<span class="nx">obj</span><span class="p">.</span><span class="nx">foo</span><span class="p">();</span> <span class="c1">// object foo</span>
+
+<span class="kd">var</span> <span class="nx">other</span> <span class="o">=</span> <span class="nx">obj</span><span class="p">.</span><span class="nx">foo</span><span class="p">;</span>
+<span class="nx">other</span><span class="p">();</span> <span class="c1">// window</span>
+
+<span class="nx">obj</span><span class="p">.</span><span class="nx">foo</span><span class="p">.</span><span class="nx">call</span><span class="p">({});</span><span class="c1">// object {}</span>
+
+<span class="nx">obj</span><span class="p">.</span><span class="nx">foo</span><span class="p">.</span><span class="nx">call</span><span class="p">();</span><span class="c1">// window</span>
+</code></pre>
 </div>
+<p>事实上，<strong>JavaScript在执行函数的时候，都是用function.call(context, arg1,arg2,…)来执行的。</strong><br />
+而当我们调用obj.foo()的时候，那么执行的就是obj.foo.call(obj)，所以打印的就是obj这个对象；同理当我们调用obj.foo.call({})，那么上下文就是{}，所以this就是{}。<br />
+而当我们调用other()的时候，那么执行的就是other.call();<strong>context为空时会默认填window对象</strong>，所以打印的就是window对象。</p>
+
+<p>用上面的方法，再来看一个例子：</p>
+
+<div class="language-javascript highlighter-rouge"><pre class="highlight"><code><span class="kd">var</span> <span class="nx">a</span> <span class="o">=</span> <span class="mi">123</span><span class="p">;</span>
+<span class="kd">function</span> <span class="nx">fn</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span> <span class="k">this</span><span class="p">.</span><span class="nx">a</span> <span class="p">);</span>
+<span class="p">}</span>
+<span class="kd">var</span> <span class="nx">obj2</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="na">a</span><span class="p">:</span> <span class="mi">42</span><span class="p">,</span>
+    <span class="na">fn</span><span class="p">:</span> <span class="nx">fn</span>
+<span class="p">};</span>
+<span class="kd">var</span> <span class="nx">obj1</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="na">a</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="na">obj2</span><span class="p">:</span> <span class="nx">obj2</span>
+<span class="p">};</span>
+<span class="nx">obj1</span><span class="p">.</span><span class="nx">obj2</span><span class="p">.</span><span class="nx">fn</span><span class="p">();</span> <span class="c1">// 42 -- this引用的是obj2</span>
+</code></pre>
+</div>
+<p>那么实际的调用方式是obj1.obj2.fn.call(obj2)，this指向的是直接上一级的对象，如果要让this引用的是window对象，只需obj1.obj2.fn.call();这样输出的就是全局的a的值123了。<br />
+所以，只要弄明白call的上下文就不搞错this的值了。</p>
 
 
-    		</div>
+
+                <hr>
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2016/12/06/js_module_loaders-2016/" data-toggle="tooltip" data-placement="top" title="模块加载器的一些理解">&larr; Previous Post</a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2016/12/14/di_ioc-2016/" data-toggle="tooltip" data-placement="top" title="依赖注入DI(Dependence Inject)">Next Post &rarr;</a>
+                    </li>
+                    
+                </ul>
+
+
+                
+
+                
+
+            </div>
+
     <!-- Sidebar Container -->
             <div class="
-                col-lg-3 col-lg-offset-0
-                col-md-3 col-md-offset-0
-                col-sm-12
-                col-xs-12
-                sidebar-container
-            ">
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
                 <!-- Featured Tags -->
                 
                 <section>
-                    <hr class="hidden-sm hidden-xs">
+                    <!-- <hr class="hidden-sm hidden-xs"> -->
                     <h5><a href="/tags/">FEATURED TAGS</a></h5>
                     <div class="tags">
-                        
+        				
                             
-                        
+        				
                             
-                                <a href="/tags/#Javascript" title="Javascript" rel="4">
+                				<a href="/tags/#Javascript" title="Javascript" rel="4">
                                     Javascript
                                 </a>
                             
-                        
+        				
                             
-                                <a href="/tags/#前端" title="前端" rel="4">
+                				<a href="/tags/#前端" title="前端" rel="4">
                                     前端
                                 </a>
                             
-                        
+        				
                             
-                        
+        				
                             
-                        
+        				
                             
-                        
+        				
                             
-                        
-                    </div>
+        				
+        			</div>
                 </section>
                 
 
-                <!-- Short About -->
-                <section class="visible-md visible-lg">
-                    <hr><h5><a href="/about/">ABOUT ME</a></h5>
-                    <div class="short-about">
-                        
-                            <img src="/img/chile.zhang.jpg" />
-                        
-                        
-                            <p>世界这么大，不和自己爱的人去看看，就老了啦</p>
-                        
-                        <!-- SNS Link -->
-                        <ul class="list-inline">
-                            
-                            
-                            
-                            <li>
-                                <a target="_blank" href="https://www.zhihu.com/people/chilezhang">
-                                    <span class="fa-stack fa-lg">
-                                        <i class="fa fa-circle fa-stack-2x"></i>
-                                        <i class="fa  fa-stack-1x fa-inverse">知</i>
-                                    </span>
-                                </a>
-                            </li>
-                            
-                            
-                            
-                            
-                            <li>
-                                <a target="_blank" href="https://github.com/zhangchile">
-                                    <span class="fa-stack fa-lg">
-                                        <i class="fa fa-circle fa-stack-2x"></i>
-                                        <i class="fa fa-github fa-stack-1x fa-inverse"></i>
-                                    </span>
-                                </a>
-                            </li>
-                            
-                        </ul>
-                    </div>
-                </section>
                 <!-- Friends Blog -->
                 
-    		</div>
-        
-	</div>
-</div>
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
 
 
     <!-- Footer -->

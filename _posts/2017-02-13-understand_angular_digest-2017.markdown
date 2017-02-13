@@ -39,7 +39,7 @@ Angular中，每次我们在页面触发一个事件（如:修改input内容的c
 
 ### dirty checking
 dirty checking 处理的方式其实很简单，就是检查一个值在被应用同步之前是不是被修改了。  
-angular中会保持观察watches（在$watch对象中）中的值，顺序遍历`$watch list`，如果要更新的值和旧的值没有变化，就会继续往下遍历。如果这个值发生了改变，angular就记录这个新的值，然后继续遍历。一但遍历完了`$watch list`，如果有任何值发生了改变，angular会再次遍历整个list，直到没有值任何变化。为什么要重新遍历整个list，因为如果我们更新一个值可能会导致另一个值更新，这样的话angular就不会检查到另外的值更新了。  
+angular中会保持观察watches（在$watch对象中）中的值，顺序遍历`$watch list`，如果要更新的值和旧的值没有变化，就会继续往下遍历。如果这个值发生了改变，angular就记录这个新的值，然后继续遍历。一但遍历完了`$watch list`，如果有任何值发生了改变，angular会再次遍历整个list，直到没有值任何变化。为什么要重新遍历整个list，因为如果我们更新一个值可能会导致另一个值更新，这样的话angular就需要遍历整个list来检查到另外的值更新。  
 但是如果循环超过了10次或更多，angular会抛出异常，并终止掉。否则应用会导致死循环。
 ![digest_loop](/img/in-post/2017-02-13/digestLoop.png)
 图片来自网络

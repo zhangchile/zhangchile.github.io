@@ -12,13 +12,14 @@ tags:
 ---
 
 ## Angular的$digest循环理解
-angualr的双向数据绑定，底层靠的是个称为“digest loop”的机制。这个digest循环主要有两部分实现：
-- $watch list
-- $evalAsync list
+angualr的双向数据绑定，底层靠的是个称为“digest loop”的机制。这个digest循环主要有两部分实现：  
+- $watch list  
+- $evalAsync list  
 
 ### $watch list
 angular中，每次我们在页面触发一个事件（如:修改input内容的change）， 都会触发一个回调函数，去更新对应的model。  
 例子：  
+
 ```html   
 <!DOCTYPE html> 
 <html ng-app> 
@@ -54,6 +55,7 @@ watchExpression可以是一个属性或者一个函数，将会在每个$digest�
 boolean参数，告诉angualr是否按照严格对等（===）来检查
 
 $watch函数会返回一个注销函数，用来告诉angular取消wath这个表达式：  
+
 ```javascript   
 // ... 
 var unregisterWatch = $scope.$watch('newUser.email',   function(newVal, oldVal) {
@@ -67,9 +69,11 @@ unregisterWatch();
 ```
 
 再举个例子，如果我们要获得一个输入框里的姓和名，  
+
 ```html   
 <input type="text" ng-model="full_name" placeholder="Enter your full name" />
 ```
+
 注意，将$watch写到controller不是最佳实践，这样会很难测试controller，最好是放到services里。  
 我们可以给full_name添加一个$watcher来实现，当输入一个全名的时候，自动识别姓和名。
 ```javascript   

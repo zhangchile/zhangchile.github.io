@@ -75,7 +75,8 @@ unregisterWatch();
 ```
 
 注意，将$watch写到controller不是最佳实践，这样会很难测试controller，最好是放到services里。  
-我们可以给full_name添加一个$watcher来实现，当输入一个全名的时候，自动识别姓和名。
+我们可以给full_name添加一个$watcher来实现，当输入一个全名的时候，自动识别姓和名。  
+
 ```javascript   
 angular.module("myApp").controller("MyController", ['$scope', function ($scope) {
     $scope.$watch('full_name', function (newVal, oldVal, scope) {
@@ -90,5 +91,5 @@ angular.module("myApp").controller("MyController", ['$scope', function ($scope) 
     });
 }]);
 ```
-在应用初始化的时候，会调用一次回到函数，所以第一次的时候，newVal和oldVal将会是undefined的，同时也是相等的，所以如果我们要初始化值，可以简单的通过newVal === oldVal判断就好。
 
+在应用初始化的时候，会调用一次回到函数，所以第一次的时候，newVal和oldVal将会是undefined的，同时也是相等的，所以如果我们要初始化值，可以简单的通过newVal === oldVal判断就好。

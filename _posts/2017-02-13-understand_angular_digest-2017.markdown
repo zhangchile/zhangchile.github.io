@@ -12,9 +12,9 @@ tags:
 ---
 
 ## Angular的$digest循环理解
-angualr的双向数据绑定，底层靠的是个称为“digest loop”的机制。这个digest循环主要有两部分实现：  
-- $watch list  
-- $evalAsync list  
+angualr的双向数据绑定，底层靠的是个称为“digest loop”的机制。这个digest循环主要有两部分实现：
+* $watch list  
+* $evalAsync list  
 
 ### $watch list
 angular中，每次我们在页面触发一个事件（如:修改input内容的change）， 都会触发一个回调函数，去更新对应的model。  
@@ -46,13 +46,13 @@ angular中会保持观察watches（在$watch对象中）中的值，顺序遍历
 ### $watch 函数
 在$scope对象上的$watch函数，会在angular的$disgest循环中设置dirty check，如果$watch的表达式发生了变化，angualr就会返回这个对象。  
 $watch函数包含三个参数：  
-- watchExpression
+* watchExpression  
 watchExpression可以是一个属性或者一个函数，将会在每个$digest循环中执行。  
-如果watchExpression是一个字符串，angualr就会把解释为$scope里的属性，如果是一个函数，就会根据函数返回的值进行判断。
-- listener/callback
-回调函数是当watchExpression发生改变（新旧值不一样）的时候，调用的函数
-- objectEquality (optional)
-boolean参数，告诉angualr是否按照严格对等（===）来检查
+如果watchExpression是一个字符串，angualr就会把解释为$scope里的属性，如果是一个函数，就会根据函数返回的值进行判断。  
+* listener/callback  
+回调函数是当watchExpression发生改变（新旧值不一样）的时候，调用的函数。  
+* objectEquality (optional)  
+boolean参数，告诉angualr是否按照严格对等（===）来检查  
 
 $watch函数会返回一个注销函数，用来告诉angular取消wath这个表达式：  
 

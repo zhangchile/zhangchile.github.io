@@ -9,7 +9,7 @@ tags:
     - php
 ---
 
-##cgi、fastcgi、php-fpm、mod_php的理解
+## cgi、fastcgi、php-fpm、mod_php的理解
 
 ### 1、CGI （Common Gateway Interface）
 CGI是一种协议，规定了服务器软件和对应解释器程序的数据传输格式，例如一些环境变量（SERVER_NAME，PATH_INFO，CONTENT_TYPE等等）、http的header信息、post数据或者query字符串等等，

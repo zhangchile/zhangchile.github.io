@@ -1,0 +1,253 @@
+---
+layout: post
+title : promise/defer
+subtitle: ""
+date: 2017-05-15
+author: "chile.zhang"
+header-img: "img/post-bg-2016.jpg"
+tags:
+    - Javascript
+    - 前端
+---
+
+## Promise/Defer
+
+在js异步编程中，有
+- 回调函数
+- 事件监听/触发
+- Promise/Defer对象
+
+### 回调函数都很清楚了
+
+```javascript
+$.get("url", function () {
+  // callback
+});
+```
+
+### 事件监听
+
+```javascript
+// 如dom事件
+$("#btn").on('click', function() {
+  // callback
+});
+```
+
+### Promise/Defer
+
+```javascript
+var promise = new Promise(function (resolve, reject) {
+if (condition) {
+  resolve('success');
+} else {
+  reject('error');
+});
+
+promise.then(function onFulfilled() {}, function onReject() {})
+       .then(function onFulfilled() {}, function onReject() {})
+       .catch(function () {});
+```
+
+上面的JavaScript原生实现逻辑
+
+### promise/defer 实现原理
+
+以 commonJS promise/A+规范来讲  
+
+promise有三种状态 pending（初始）、fulfilled（完成）、rejected（拒绝），三种状态只能由pending转到fulfilled或者rejected，且只能转换一次。  
+promise对象通过then(onFulfilled, onReject)方法来暴露对外的接口，then返回promise对象来实现链式调用。  
+要实现promise要先解决：  
+1. promise状态和回调函数的剥离，剥离后回调还能够正常执行
+2. 链式调用和管理状态
+下面是一个简单的原理  
+```javascript   
+function Promise() {
+  this._PENDING = 0;
+  this._FULFILLED = 1;
+  this._REJECTED = 2;
+  
+  this.state = this._PENDING;
+
+  this.onfulfill = [];
+  this.onreject = [];
+  
+}
+
+Promise.prototype.then = function (fulfill, reject) {
+  if (typeof fulfill == 'function') {
+    this.onfulfill.push(fulfill);
+  }
+  
+  if (typeof reject == 'function') {
+    this.onreject.push(reject);
+  }
+  
+  return this;
+}
+
+Promise.prototype.resolve = function (param) {
+  if (this.state == this._REJECTED) {
+    return ;
+  }
+  this.state = this._FULFILLED;
+  var that = this;
+
+  this.complete('onfulfill', param);
+
+  return this;
+}
+
+Promise.prototype.reject = function (param) {
+  if (this.state == this._FULFILLED) {
+    return ;
+  }
+
+  this.state = this._REJECTED;
+  var that = this;
+
+  this.complete('onreject', param);
+
+  return this;
+}
+
+Promise.prototype.complete = function (type, param) {
+  var that = this;
+  var result = param;
+  var callback = [];
+  if (type == 'onfulfill') {
+    callback = that.onfulfill;
+  } else {
+    callback = that.onreject;
+  }
+  setTimeout(function () {
+    while(callback.length) {
+      var res = (callback.shift())(result);
+      if (res) {
+        result = res;
+      }
+    }
+  });
+}
+
+function getInfo() {
+  var promise = new Promise();
+
+  setTimeout(function () {
+    promise.reject('hahaha');
+    //promise.resolve('ok');// no action
+    
+  }, 1000);
+  
+  return promise;
+}
+
+// demo
+(new getInfo()).then(function (msg) {
+  console.log('get data - ' + msg);
+  return 'step1 finish';
+}, function (err) {
+  console.log('get err - ' + err);
+  return 'step1 error - ' + err;
+}).then(function (msg) {
+  console.log('get data step2 - ' + msg);
+}, function (err) {
+  console.log('get err step2 -' + err);
+});
+
+```
+promise通过then()让回调变成了链式，解决了回调嵌套过多导致难以阅读、维护的问题。  
+
+### 为什么要用到promise
+#### 解决回调嵌套问题
+```javascript   
+var fs =  require('fs');
+fs.readFile('foo.txt','utf8', function (err, data) {
+  if (!err && data) {
+    console.log('foo.txt' + data);
+    fs.readFile('foo2.txt', 'utf8', function (err, data) {
+      console.log('foo2.txt' + data);
+      //fs.readFile....
+    })
+  }
+});
+```
+换成promise可以用更优雅的方式来顺序读取文件。
+```javascript   
+var fs = require('fs');
+var q = require('q');
+
+var readFile = function (name) {
+    return function () {
+        var defer = q.defer();
+        fs.readFile(name, 'utf8', function (err, data) {
+            if (!err && data) {
+                console.log('file ' + name + ' data = ' + data);
+                defer.resolve(data);
+            } else {
+                console.log('readFile ' + name +' error ' + err);
+                defer.reject(err);
+            }
+        });
+        return defer.promise;
+    }
+}
+
+readFile('a.txt')().then(readFile('b.txt')).then(readFile('c.txt'))
+.done(function (fulfilled) {
+    console.log('readfile done ' + fulfilled);
+}, function (reject) {
+    console.log('readfile done err ' + reject);
+});
+```
+#### 延迟顺序执行任务
+顺序加载延迟动画或步骤用promise将十分方便。
+```javascript
+var q = require('q');
+var defer = q.defer();
+
+var startMission = function () {
+  console.log('mission start ..');
+  setTimeout(function () {
+    defer.resolve('mission start ..');
+  }, 0);
+  return defer.promise;
+}
+
+var afterSecond = function (sec) {
+  return function () {
+    var defer = q.defer();
+    setTimeout(function () {
+      console.log('mission exec after second ' + sec)
+      defer.resolve('after sec ' + sec);
+    }, sec * 1000);
+    return defer.promise;
+  }
+}
+
+startMission().then(afterSecond(2)).then(afterSecond(5));
+```
+
+#### 并行执行任务
+```javascript   
+var q = require('q');
+
+var afterSecond = function (sec) {
+  var defer = q.defer();
+  setTimeout(function () {
+    console.log('mission exec after second ' + sec)
+    defer.resolve('after sec ' + sec);
+  }, sec * 1000);
+  return defer.promise;
+}
+
+q.all([afterSecond(1),afterSecond(2)]).then(function (msg) {
+  msg.forEach(function (m) {
+    console.log(m);
+  });
+  
+});
+```
+多个任务执行完成后返回一个promise，当其中一个promise状态变为reject则会直接将整个promise转换为reject状态。如果想要所有的promise的状态都转变后再转换q.all的状态，则可以用q.allSettled()这个方法。
+
+

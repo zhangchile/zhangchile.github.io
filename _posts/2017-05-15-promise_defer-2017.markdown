@@ -61,6 +61,7 @@ promise对象通过then(onFulfilled, onReject)方法来暴露对外的接口，t
 1. promise状态和回调函数的剥离，剥离后回调还能够正常执行
 2. 链式调用和管理状态
 下面是一个简单的原理  
+
 ```javascript   
 function Promise() {
   this._PENDING = 0;
